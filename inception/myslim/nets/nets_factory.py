@@ -22,19 +22,19 @@ import functools
 import tensorflow as tf
 
 from nets import inception
-from nets import inception_v4_alt
+from nets import inception_alt
 from nets import overfeat
 
 slim = tf.contrib.slim
 
 networks_map = {'overfeat': overfeat.overfeat,
                 'inception_v4': inception.inception_v4,
-                'inception_v4_alt': inception.inception_v4_alt,
+                'inception_v4_alt': inception_alt.inception_v4,
                }
 
 arg_scopes_map = {'overfeat': overfeat.overfeat_arg_scope,
                   'inception_v4': inception.inception_v4_arg_scope,
-                  'inception_v4_alt': inception.inception_v4_alt_arg_scope,
+                  'inception_v4_alt': inception_alt.inception_v4_arg_scope,
                  }
 
 
