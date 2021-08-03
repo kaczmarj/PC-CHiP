@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import warnings
+
 warnings.simplefilter("ignore", FutureWarning)
 
 from pathlib import Path
@@ -96,7 +97,10 @@ def main(_):
                     compression="gzip",
                 )
 
+            h5.create_dataset(
+                "/filenames", data=[s.name.encode("ascii") for s in file_list]
+            )
+
 
 if __name__ == "__main__":
     tf.app.run()
-
