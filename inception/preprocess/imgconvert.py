@@ -23,8 +23,8 @@ def getGradientMagnitude(im):
 def main():
     filepath=sys.argv[1]
     img  = OpenSlide(filepath)
-    if not os.path.exists(sys.argv[3]):
-        os.makedirs(sys.argv[3])
+    if not os.path.exists(sys.argv[2]):
+        os.makedirs(sys.argv[2])
     if str(img.properties.values.__self__.get('tiff.ImageDescription')).split("|")[1] == "AppMag = 40":
         sz=1024
         seq=924
@@ -34,14 +34,15 @@ def main():
     [w, h] = img.dimensions
     for x in range(1, w, seq):
         for y in range(1, h, seq):
-            print(str(x) + ", " + str(y))
             img1=img.read_region(location=(x,y), level=0, size=(sz,sz))
             img11=img1.convert("RGB")
             img111=img11.resize((512,512),Image.ANTIALIAS)
             grad=getGradientMagnitude(np.array(img111))
             unique, counts = np.unique(grad, return_counts=True)
             if counts[np.argwhere(unique<=20)].sum() < 512*512*0.6:
-                img111.save(sys.argv[3] + "/" + sys.argv[2] + "_" +  str(x) + "_" + str(y) + '.jpg', 'JPEG', optimize=True, quality=94)
+                output_name = sys.argv[2] + "/" + os.path.basename(sys.argv[1]) + "_" +  str(x) + "_" + str(y) + '.jpg'
+                print(output_name)
+                img111.save(output_name, 'JPEG', optimize=True, quality=94)
 
 if __name__ == "__main__":
    main()
