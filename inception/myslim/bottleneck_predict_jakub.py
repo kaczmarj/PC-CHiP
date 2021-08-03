@@ -1,12 +1,14 @@
 #!/usr/bin/env python
 
 import warnings
+
 warnings.simplefilter("ignore", FutureWarning)
 
 from pathlib import Path
 import sys
 
 import h5py
+import numpy as np
 import tensorflow as tf
 
 from nets import nets_factory
@@ -68,35 +70,49 @@ def main(_):
         checkpoint_path, slim.get_model_variables(model_variables)
     )
 
+    file_list = list(Path(FLAGS.filedir).glob("*.jpg"))
+    n_files = len(file_list)
+    all_bottles = np.empty((n_files, 1536), dtype="float32")
+    all_probs = np.empty((n_files, 42), dtype="float32")
+
+    print("Bottleneck array:", round(all_bottles.nbytes / 1e9), "GB")
+    print("Probabilities array:", round(all_probs.nbytes / 1e9), "GB")
+
     with tf.Session() as sess:
         init_fn(sess)
-        with h5py.File(FLAGS.bot_out, "w") as h5:
-            file_list = list(Path(FLAGS.filedir).glob("*.jpg"))
-            for file in file_list:
-                print(file)
-                with file.open("rb") as f:
-                    input_str = f.read().strip()
-                preds = sess.run(
-                    probabilities,
-                    feed_dict={image_string: input_str},
-                )
-                bottleneck_values = sess.run(
-                    bottleneck_tensor_name,
-                    {image_string: input_str},
-                )
+        for j, file in enumerate(file_list):
+            print(file)
+            with file.open("rb") as f:
+                input_str = f.read().strip()
+            # Get bottleneck values.
+            this_bottle = sess.run(
+                bottleneck_tensor_name,
+                {image_string: input_str},
+            )
+            all_bottles[j, :] = this_bottle.squeeze()
+            # Get probabilities.
+            this_probs = sess.run(
+                probabilities,
+                feed_dict={image_string: input_str},
+            )
+            all_probs[j, :] = this_probs.squeeze()
 
-                h5.create_dataset(
-                    "/bottle/{}".format(file.name),
-                    data=bottleneck_values.squeeze(),
-                    compression="gzip",
-                )
-                h5.create_dataset(
-                    "/preds/{}".format(file.name),
-                    data=preds.squeeze(),
-                    compression="gzip",
-                )
+    print("Saving file to", FLAGS.bot_out)
+    with h5py.File(FLAGS.bot_out, "w") as h5:
+        h5.create_dataset(
+            "/bottle",
+            data=all_bottles,
+            compression="gzip",
+        )
+        h5.create_dataset(
+            "/probs",
+            data=all_probs,
+            compression="gzip",
+        )
+        h5.create_dataset(
+            "/filenames", data=[s.name.encode("ascii") for s in file_list]
+        )
 
 
 if __name__ == "__main__":
     tf.app.run()
-
