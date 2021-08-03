@@ -75,8 +75,8 @@ def main(_):
     all_bottles = np.empty((n_files, 1536), dtype="float32")
     all_probs = np.empty((n_files, 42), dtype="float32")
 
-    print("Bottleneck array:", round(all_bottles.nbytes / 1e9), "GB")
-    print("Probabilities array:", round(all_probs.nbytes / 1e9), "GB")
+    print("Bottleneck array:", round(all_bottles.nbytes / 1e6, 2), "MB")
+    print("Probabilities array:", round(all_probs.nbytes / 1e6, 2), "MB")
 
     with tf.Session() as sess:
         init_fn(sess)
