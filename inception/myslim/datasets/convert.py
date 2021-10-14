@@ -83,7 +83,7 @@ def _convert_dataset(split_name, filenames, tps, Qs, classnames, classids, outpu
   sys.stdout.flush()
 
 if __name__ == '__main__':
-  
+
   if len(sys.argv) != 4:
     exit()
 
@@ -103,6 +103,9 @@ if __name__ == '__main__':
   Qs = []
   with open(file_info) as f:
     for line in f:
+      # Ignore commented lines.
+      if line.strip().startswith("#"):
+        continue
       l = line.split()
       image_filenames.append(l[0])
       class_names.append(l[1])
