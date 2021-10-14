@@ -6,7 +6,7 @@ import cv2
 import numpy as np
 from PIL import Image
 from openslide import OpenSlide
-from resizeimage import resizeimage
+
 
 def getGradientMagnitude(im):
     "Get magnitude of gradient for given image"
@@ -45,4 +45,3 @@ def main():
 
 if __name__ == "__main__":
    main()
-                
